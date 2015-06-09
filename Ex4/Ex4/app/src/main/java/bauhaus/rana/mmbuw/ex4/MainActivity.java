@@ -16,6 +16,8 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -29,7 +31,12 @@ public class MainActivity extends Activity {
     public static final String TAG = "NfcDemo";
 
     private TextView mTextView;
+    private TextView tagID;
+    private TextView Data_type;
+    private Button Data;
     private NfcAdapter mNfcAdapter;
+
+    private String strData = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,6 +51,9 @@ public class MainActivity extends Activity {
         toast.show();
 
         mTextView = (TextView) findViewById(R.id.textView_explanation);
+        tagID = (TextView) findViewById(R.id.tagID);
+        Data_type = (TextView) findViewById(R.id.Data_type);
+        Data = (Button) findViewById(R.id.Data);
 
         mNfcAdapter = NfcAdapter.getDefaultAdapter(this);
 
@@ -58,6 +68,20 @@ public class MainActivity extends Activity {
         } else {
             mTextView.setText("NFC Enabled");
         }
+
+        Data.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View view) {
+
+                Context context = getApplicationContext();
+                CharSequence text = "" + strData;
+                int duration = Toast.LENGTH_SHORT;
+
+                Toast toast = Toast.makeText(context, text, duration);
+                toast.show();
+
+            }
+        });
 
         handleIntent(getIntent());
     }
@@ -174,6 +198,7 @@ public class MainActivity extends Activity {
         protected void onPostExecute(String result) {
             if (result != null) {
                 mTextView.setText("NFC Output : " + result);
+                strData = result;
             }
         }
 
@@ -195,7 +220,10 @@ public class MainActivity extends Activity {
             String type = intent.getType();
             if (MIME_TEXT_PLAIN.equals(type)) {
 
+                Data_type.setText("Type : " + type);
+
                 Tag tag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
+                tagID.setText("Tag ID : " + tag.getId().toString());
                 new NdefReaderTask().execute(tag);
 
             } else {
